@@ -15,13 +15,35 @@ select *from order_details;
 
 select * from pizzas
 
--- the most ordered pizza type
-select pt.name, p.pizza_id,sum (p.price * quantity) as revenue
+-- Getting the total revenue of all ordered pizza
+select pt.name,sum(p.price * o.quantity) as revenue
 from pizza_types as pt
 left join pizzas as p
 on p.pizza_type_id = pt.pizza_type_id
 left join order_details as od
 on od.pizza_id = p.pizza_id
-group by pt.name, p.pizza_id,p.price, od.quantity
-order by revenue desc ;
+group by pt.name
+order by revenue desc limit 1;
+
+--To Extract the year in the order table
+select distinct(extract(YEAR from CAST(order_date AS DATE)))
+FROM orders;
+
+--Pizza that contributes the most revenue each year from 2023 to 2025
+select pt.name,extract (YEAR FROM o.order_date::DATE) as year, sum(od.quantity * p.price) as total_revenue
+from pizza_types as pt
+left join pizzas as p
+on p.pizza_type_id = pt.pizza_type_id
+left join order_details as od
+on od.pizza_id = p.pizza_id
+left join orders as o
+on o.order_id = od.order_id
+group by year,name
+order by year, total_revenue desc;
+
+
+
+
+
+
 
